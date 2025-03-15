@@ -11,6 +11,7 @@ class CourseController extends Controller
     {
         try {
             $courses = Course::query()->latest()->get();
+
             return response()->json([
                 'status' => 'success',
                 'message' => 'Courses fetched successfully',
@@ -32,8 +33,10 @@ class CourseController extends Controller
                 'name' => 'required|string',
                 'description' => 'required|string'
             ]);
+
             $validatedData['slug'] = null;
             $course = Course::query()->create($request->all());
+
             return response()->json([
                 'status' => 'success',
                 'message' => 'Course created successfully',
@@ -52,6 +55,7 @@ class CourseController extends Controller
     {
         try {
             $course = Course::query()->findOrFail($id);
+
             return response()->json([
                 'status' => 'success',
                 'message' => 'Course fetched successfully',
@@ -73,9 +77,11 @@ class CourseController extends Controller
                 'name' => 'required|string',
                 'description' => 'required|string'
             ]);
+
             $course = Course::query()->findOrFail($id);
             $validatedData['slug'] = null;
             $course->update($validatedData);
+
             return response()->json([
                 'status' => 'success',
                 'message' => 'Course updated successfully',
@@ -94,7 +100,9 @@ class CourseController extends Controller
     {
         try {
             $course = Course::query()->findOrFail($id);
+
             $course->delete();
+
             return response()->json([
                 'status' => 'success',
                 'message' => 'Course deleted successfully',

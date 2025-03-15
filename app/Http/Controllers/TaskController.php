@@ -2,15 +2,22 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Course;
 use App\Models\Task;
 use Illuminate\Http\Request;
 
 class TaskController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         try {
-            $tasks = Task::query()->with(['course'])->latest()->get();
+            $validatedData = $request->validate([
+                'slug' => 'required|string|exists:courses,slug'
+            ]);
+
+            $course = Course::query()->where('slug', $validatedData['slug'])->first();
+            $tasks = Task::query()->where('course_id', $course->id)->with(['course'])->latest()->get();
+
             return response()->json([
                 'status' => 'success',
                 'message' => 'Tasks fetched successfully',
@@ -35,7 +42,9 @@ class TaskController extends Controller
                 'status' => 'required|string',
                 'deadline' => 'required|date'
             ]);
+
             $task = Task::query()->create($validatedData);
+
             return response()->json([
                 'status' => 'success',
                 'message' => 'Task created successfully',
@@ -54,6 +63,7 @@ class TaskController extends Controller
     {
         try {
             $task = Task::query()->with(['course'])->findOrFail($id);
+
             return response()->json([
                 'status' => 'success',
                 'message' => 'Task fetched successfully',
@@ -72,6 +82,7 @@ class TaskController extends Controller
     {
         try {
             $task = Task::query()->findOrFail($id);
+
             $validatedData = $request->validate([
                 'course_id' => 'required|integer|exists:courses,id',
                 'name' => 'required|string',
@@ -79,8 +90,10 @@ class TaskController extends Controller
                 'status' => 'required|string',
                 'deadline' => 'required|date'
             ]);
+
             $task->update($validatedData);
             $task->load('course');
+
             return response()->json([
                 'status' => 'success',
                 'message' => 'Task updated successfully',
@@ -99,7 +112,9 @@ class TaskController extends Controller
     {
         try {
             $task = Task::query()->findOrFail($id);
+
             $task->delete();
+
             return response()->json([
                 'status' => 'success',
                 'message' => 'Task deleted successfully',
